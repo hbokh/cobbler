@@ -31,6 +31,8 @@ from cobbler.cexceptions import CX
 
 
 # defaults is to be used if the config file doesn't contain the value we need
+from cobbler.cexceptions import CX
+
 DEFAULTS = {
     "allow_duplicate_hostnames": [0, "bool"],
     "allow_duplicate_ips": [0, "bool"],
