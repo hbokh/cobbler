@@ -256,8 +256,8 @@ class Settings:
                     value = utils.input_string_or_list(value)
                 elif DEFAULTS[name][1] == "dict":
                     value = utils.input_string_or_dict(value)[1]
-            except:
-                raise AttributeError
+            except Exception as e:
+                raise AttributeError from e
 
             self.__dict__[name] = value
             update_settings_file(self.to_dict())
@@ -282,13 +282,13 @@ class Settings:
                 self.__dict__[name] = result
                 return result
             return self.__dict__[name]
-        except:
+        except Exception as e:
             if name in DEFAULTS:
                 lookup = DEFAULTS[name][0]
                 self.__dict__[name] = lookup
                 return lookup
             else:
-                raise AttributeError(f"no settings attribute named '{name}' found")
+                raise AttributeError(f"no settings attribute named '{name}' found") from e
 
 
 def parse_bind_config(configpath):
@@ -322,7 +322,7 @@ def parse_bind_config(configpath):
                 DEFAULTS["bind_chroot_path"] = rootdirmatch.group(1)
 
 
-def autodect_bind_chroot():
+def autodetect_bind_chroot():
     """
     Autodetect bind chroot configuration
     """
@@ -389,4 +389,4 @@ def update_settings_file(data, filepath="/etc/cobbler/settings.yaml"):
 
 
 # Initialize Settings module for manipulating the global DEFAULTS variable
-autodect_bind_chroot()
+autodetect_bind_chroot()
