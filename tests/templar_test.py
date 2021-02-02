@@ -6,50 +6,52 @@ from cobbler.cobbler_collections.manager import CollectionManager
 from cobbler.templar import Templar
 
 
-class TemplarTest:
-    def test_check_for_invalid_imports(self):
-        # Arrange
-        test_api = CobblerAPI()
-        test_collection_mgr = CollectionManager(test_api)
-        test_templar = Templar(test_collection_mgr)
-        testdata = "#import json"
+def test_check_for_invalid_imports():
+    # Arrange
+    test_api = CobblerAPI()
+    test_collection_mgr = CollectionManager(test_api)
+    test_templar = Templar(test_collection_mgr)
+    testdata = "#import json"
 
-        # Act & Assert
-        with pytest.raises(CX):
-            test_templar.check_for_invalid_imports(testdata)
+    # Act & Assert
+    with pytest.raises(CX):
+        test_templar.check_for_invalid_imports(testdata)
 
-    def test_render(self):
-        # Arrange
-        test_api = CobblerAPI()
-        test_collection_mgr = CollectionManager(test_api)
-        test_templar = Templar(test_collection_mgr)
 
-        # Act
-        test_templar.render()
+def test_render():
+    # Arrange
+    test_api = CobblerAPI()
+    test_collection_mgr = CollectionManager(test_api)
+    test_templar = Templar(test_collection_mgr)
 
-        # Assert
-        assert False
+    # Act
+    result = test_templar.render("", {}, None, template_type="cheetah")
 
-    def test_render_cheetah(self):
-        # Arrange
-        test_api = CobblerAPI()
-        test_collection_mgr = CollectionManager(test_api)
-        test_templar = Templar(test_collection_mgr)
+    # Assert
+    assert False
 
-        # Act
-        test_templar.render_cheetah()
 
-        # Assert
-        assert False
+def test_render_cheetah():
+    # Arrange
+    test_api = CobblerAPI()
+    test_collection_mgr = CollectionManager(test_api)
+    test_templar = Templar(test_collection_mgr)
 
-    def test_render_jinja2(self):
-        # Arrange
-        test_api = CobblerAPI()
-        test_collection_mgr = CollectionManager(test_api)
-        test_templar = Templar(test_collection_mgr)
+    # Act
+    result = test_templar.render_cheetah("$test", {"test": 5})
 
-        # Act
-        test_templar.render_jinja2()
+    # Assert
+    assert result == 5
 
-        # Assert
-        assert False
+
+def test_render_jinja2():
+    # Arrange
+    test_api = CobblerAPI()
+    test_collection_mgr = CollectionManager(test_api)
+    test_templar = Templar(test_collection_mgr)
+
+    # Act
+    result = test_templar.render_jinja2("{{ foo }}", {"foo": "Test successful"})
+
+    # Assert
+    assert result == "Test successful"
