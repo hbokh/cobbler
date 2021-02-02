@@ -25,6 +25,7 @@ import re
 import traceback
 
 import yaml
+from schema import Schema
 
 from cobbler import utils
 from cobbler.cexceptions import CX
@@ -346,6 +347,129 @@ def __migrate_settingsfile_name():
         os.rename("/etc/cobbler/settings", "/etc/cobbler/settings.yaml")
 
 
+def validate_settings(settings_content: dict) -> dict:
+    """
+    This function performs logical validation of our loaded YAML files.
+
+    This function will:
+    - Perform type validation on all values of all keys.
+    - Provide defaults for optional settings.
+
+    :param settings_content: The dictionary content from the YAML file.
+    :return: The Settings of Cobbler which can be safely used inside this instance.
+    """
+    schema = Schema({
+        "allow_duplicate_hostnames": bool,
+        "allow_duplicate_ips": bool,
+        "allow_duplicate_macs": bool,
+        "allow_dynamic_settings": bool,
+        "always_write_dhcp_entries": bool,
+        "anamon_enabled": bool,
+        "auth_token_expiration": int,
+        "authn_pam_service": str,
+        "autoinstall_snippets_dir": str,
+        "autoinstall_templates_dir": str,
+        "bind_chroot_path": str,
+        "bind_master": str,
+        "boot_loader_conf_template_dir": str,
+        "bootloaders_dir": str,
+        "grubconfig_dir": str,
+        "build_reporting_enabled": bool,
+        "build_reporting_ignorelist": str,
+        "build_reporting_sender": str,
+        "build_reporting_smtp_server": str,
+        "build_reporting_subject": str,
+        "buildisodir": str,
+        "cache_enabled": bool,
+        "cheetah_import_whitelist": [str],
+        "client_use_https": bool,
+        "client_use_localhost": bool,
+        "cobbler_master": str,
+        "convert_server_to_ip": bool,
+        "createrepo_flags": str,
+        "default_autoinstall": str,
+        "default_name_servers": [str],
+        "default_name_servers_search": [str],
+        "default_ownership": [str],
+        "default_password_crypted": str,
+        "default_template_type": str,
+        "default_virt_bridge": str,
+        "default_virt_disk_driver": str,
+        "default_virt_file_size": int,
+        "default_virt_ram": int,
+        "default_virt_type": str,
+        "enable_gpxe": bool,
+        "enable_menu": bool,
+        "http_port": int,
+        "include": [str],
+        "iso_template_dir": str,
+        "kernel_options": [{}, "dict"],
+        "ldap_anonymous_bind": bool,
+        "ldap_base_dn": str,
+        "ldap_port": int,
+        "ldap_search_bind_dn": str,
+        "ldap_search_passwd": str,
+        "ldap_search_prefix": str,
+        "ldap_server": str,
+        "ldap_tls": str,
+        "ldap_tls_cacertfile": str,
+        "ldap_tls_certfile": str,
+        "ldap_tls_keyfile": str,
+        "bind_manage_ipmi": bool,
+        "manage_dhcp": bool,
+        "manage_dns": bool,
+        "manage_forward_zones": [str],
+        "manage_reverse_zones": [str],
+        "manage_genders": bool,
+        "manage_rsync": bool,
+        "manage_tftp": bool,
+        "manage_tftpd": bool,
+        "mgmt_classes": [str],
+        "mgmt_parameters": {str: str},
+        "next_server": str,
+        "nsupdate_enabled": bool,
+        "power_management_default_type": str,
+        "proxy_url_ext": str,
+        "proxy_url_int": str,
+        "puppet_auto_setup": bool,
+        "puppet_parameterized_classes": bool,
+        "puppet_server": str,
+        "puppet_version": int,
+        "puppetca_path": str,
+        "pxe_just_once": bool,
+        "nopxe_with_triggers": bool,
+        "redhat_management_permissive": bool,
+        "redhat_management_server": str,
+        "redhat_management_key": str,
+        "register_new_installs": bool,
+        "remove_old_puppet_certs_automatically": bool,
+        "replicate_repo_rsync_options": str,
+        "replicate_rsync_options": str,
+        "reposync_flags": str,
+        "restart_dhcp": bool,
+        "restart_dns": bool,
+        "run_install_triggers": bool,
+        "scm_track_enabled": bool,
+        "scm_track_mode": str,
+        "scm_track_author": str,
+        "scm_push_script": str,
+        "serializer_pretty_json": bool,
+        "server": str,
+        "sign_puppet_certs_automatically": bool,
+        "signature_path": str,
+        "signature_url": str,
+        "tftpboot_location": str,
+        "virt_auto_boot": bool,
+        "webdir": str,
+        "webdir_whitelist": [str],
+        "xmlrpc_port": int,
+        "yum_distro_priority": int,
+        "yum_post_install_mirror": bool,
+        "yumdownloader_flags": str,
+    })
+    return schema.validate(settings_content)
+
+
 def read_settings_file(filepath="/etc/cobbler/settings.yaml"):
     """
     Reads the settings file from the default location or the given one. This method then also recursively includes all
@@ -386,6 +510,16 @@ def update_settings_file(data, filepath="/etc/cobbler/settings.yaml"):
     __migrate_settingsfile_name()
     with open(filepath, "w") as settings_file:
         yaml.safe_dump(data, settings_file)
+
+
+def update_settings_file_safe(data):
+    """
+    This validates the settings before writing them to the destination.
+
+    :param data: The data formatted as a dictionary.
+    """
+    validated_data = validate_settings(data)
+    update_settings_file(validated_data)
 
 
 # Initialize Settings module for manipulating the global DEFAULTS variable
