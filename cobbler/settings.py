@@ -151,6 +151,10 @@ FIELDS = [
 
 
 class Settings:
+    """
+    Class which contains all application wide settings. All settings which are not set have defaults, these are not
+    reasonable for all environments.
+    """
 
     @staticmethod
     def collection_type() -> str:
@@ -290,6 +294,14 @@ class Settings:
 
 
 def parse_bind_config(configpath):
+    """
+    Tries to parse the bind configuration and adjust the defaults to a more reasonable value.
+
+    :param configpath: The path to the bind config.
+    """
+    if not os.path.exists(configpath):
+        return
+
     global DEFAULTS
     bind_config = {}
     # When running as a webapp we can't access this, but don't need it
@@ -359,9 +371,9 @@ def read_settings_file(filepath="/etc/cobbler/settings.yaml"):
                 for ifile in glob.glob(ival):
                     with open(ifile, 'r') as extra_settingsfile:
                         filecontent.update(yaml.safe_load(extra_settingsfile.read()))
-    except Exception:
+    except Exception as e:
         traceback.print_exc()
-        raise CX("\"%s\" is not a valid YAML file" % filepath)
+        raise CX("\"%s\" is not a valid YAML file" % filepath) from e
     return filecontent
 
 

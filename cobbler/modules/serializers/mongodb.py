@@ -51,9 +51,9 @@ def __connect(configfile="/etc/cobbler/mongodb.conf"):
     global mongodb
     try:
         mongodb = MongoClient(host, port)['cobbler']
-    except Exception:
+    except Exception as e:
         # FIXME: log error
-        raise CX("Unable to connect to Mongo database or get database \"cobbler\"")
+        raise CX("Unable to connect to Mongo database or get database \"cobbler\"") from e
 
 
 def register() -> str:
